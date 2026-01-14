@@ -1,82 +1,147 @@
 // App.jsx
-import { useState } from "react";
+// App.jsx
+import { useState, useEffect } from "react";
+import { supabase } from "./supabaseClient";
+import { useNavigate } from "react-router-dom";
+
 import NewProject from "./components/NewProject";
 import NoProject from "./components/NoProjects";
 import ProjectsSidebar from "./components/ProjectsSidebar";
 import SelectedProject from "./components/SelectedProject";
+import UserMenu from "./components/UserMenu";
 
 function App() {
+  const navigate = useNavigate();
+
   const [projectState, setProjectState] = useState({
     selectedProjectId: undefined,
     projects: [],
     tasks: [],
   });
 
-  function handleStartAddProject() {
-    setProjectState((prev) => ({
-      ...prev,
-      selectedProjectId: null,
-    }));
-  }
+  // Check if user is logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) navigate("/login");
+      else fetchProjects(data.user.id);
+    };
+    checkUser();
+  }, []);
 
-  function handleCancelAddProject() {
+  // Fetch projects & tasks for the user
+  const fetchProjects = async (userId) => {
+    const { data: projectsData } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
+
+    setProjectState((prev) => ({ ...prev, projects: projectsData || [] }));
+
+    const projectIds = projectsData?.map((p) => p.id) || [];
+    if (projectIds.length > 0) {
+      const { data: tasksData } = await supabase
+        .from("tasks")
+        .select("*")
+        .in("project_id", projectIds)
+        .order("created_at", { ascending: true });
+
+      setProjectState((prev) => ({ ...prev, tasks: tasksData || [] }));
+    }
+  };
+
+  // --- Project Handlers ---
+  const handleStartAddProject = () =>
+    setProjectState((prev) => ({ ...prev, selectedProjectId: null }));
+
+  const handleCancelAddProject = () =>
+    setProjectState((prev) => ({ ...prev, selectedProjectId: undefined }));
+
+  const handleAddProject = async (projectData) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user.id;
+
+    const { data, error } = await supabase
+      .from("projects")
+      .insert([{ ...projectData, user_id: userId }])
+      .select()
+      .single();
+
+    if (error) return alert(error.message);
+
     setProjectState((prev) => ({
       ...prev,
+      projects: [...prev.projects, data],
       selectedProjectId: undefined,
     }));
-  }
+  };
 
-  function handleAddProject(projectData) {
+  const handleSelectProject = (id) =>
+    setProjectState((prev) => ({ ...prev, selectedProjectId: id }));
+
+  const handleDeleteProject = async () => {
+    const projectId = projectState.selectedProjectId;
+    if (!projectId) return;
+
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId);
+    if (error) return alert(error.message);
+
+    await supabase.from("tasks").delete().eq("project_id", projectId);
+
     setProjectState((prev) => ({
       ...prev,
-      projects: [...prev.projects, { ...projectData, id: Math.random() }],
+      projects: prev.projects.filter((p) => p.id !== projectId),
+      tasks: prev.tasks.filter((t) => t.project_id !== projectId),
       selectedProjectId: undefined,
     }));
-  }
+  };
 
-  function handleSelectProject(id) {
+  // --- Task Handlers ---
+  const handleAddTask = async (text) => {
+    const projectId = projectState.selectedProjectId;
+    if (!projectId) return;
+
+    // ✅ Fetch current user ID
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user.id;
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert([
+        { text, project_id: projectId, user_id: userId, completed: false },
+      ])
+      .select()
+      .single();
+
+    if (error) return alert(error.message);
+
     setProjectState((prev) => ({
       ...prev,
-      selectedProjectId: id,
+      tasks: [...prev.tasks, data],
     }));
-  }
+  };
 
-  function handleDeleteProject() {
-    setProjectState((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((p) => p.id !== prev.selectedProjectId),
-      tasks: prev.tasks.filter((t) => t.projectId !== prev.selectedProjectId),
-      selectedProjectId: undefined,
-    }));
-  }
+  const handleDeleteTask = async (id) => {
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) return alert(error.message);
 
-  function handleAddTask(text) {
-    setProjectState((prev) => ({
-      ...prev,
-      tasks: [
-        ...prev.tasks,
-        {
-          id: Math.random(),
-          text,
-          projectId: prev.selectedProjectId,
-        },
-      ],
-    }));
-  }
-
-  function handleDeleteTask(id) {
     setProjectState((prev) => ({
       ...prev,
       tasks: prev.tasks.filter((t) => t.id !== id),
     }));
-  }
+  };
 
+  // --- Derived Data ---
   const selectedProject = projectState.projects.find(
     (p) => p.id === projectState.selectedProjectId
   );
 
   const projectTasks = projectState.tasks.filter(
-    (t) => t.projectId === projectState.selectedProjectId
+    (t) => t.project_id === projectState.selectedProjectId
   );
 
   const isNoProject = projectState.selectedProjectId === undefined;
@@ -108,11 +173,12 @@ function App() {
           src="https://i.pinimg.com/originals/fe/e9/55/fee955a4c443424dd55cf8239698291f.gif"
           className="w-full h-full object-cover filter contrast-125 saturate-120 brightness-90"
         />
-        {/* Overlay for dim / tint */}
         <div className="absolute w-full h-full bg-black/40"></div>
       </div>
-
-      {/* Content */}
+      <div className="absolute top-4 right-4 z-20">
+        <UserMenu />
+      </div>
+      {/* Sidebar */}
       <ProjectsSidebar
         projects={projectState.projects}
         selectedProjectId={projectState.selectedProjectId}
@@ -120,6 +186,7 @@ function App() {
         onSelectProject={handleSelectProject}
       />
 
+      {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto relative z-10">
         {isNoProject ? (
           <div className="flex items-center justify-center h-full">
