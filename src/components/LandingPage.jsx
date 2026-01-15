@@ -38,8 +38,8 @@ const LandingPage = () => {
       {/* Content */}
       <div className="relative z-10 text-center px-6 space-y-6">
         <h1
-          className="text-6xl font-extrabold text-white drop-shadow-lg"
-          style={{ fontFamily: "'Poppins', sans-serif" }}
+          className="text-6xl font-black italic text-white drop-shadow-lg"
+          style={{ fontFamily: "'Mulish', sans-serif" }}
         >
           Taskly
         </h1>
@@ -48,8 +48,7 @@ const LandingPage = () => {
           className="text-xl text-white/80 max-w-lg mx-auto drop-shadow-sm"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          Organize your projects, manage tasks, and stay productive
-          effortlessly.
+          Keep your projects in check and crush your tasks daily.
         </p>
 
         <div className="flex gap-6 justify-center mt-3">
