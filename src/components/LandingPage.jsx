@@ -22,12 +22,18 @@ const LandingPage = () => {
         href="https://github.com/anuragbhonsle"
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/50 hover:bg-black/70 transition"
-        title="GitHub"
+        className="
+    absolute top-5 right-5 z-30
+    p-2 rounded-full
+    bg-black/40 hover:bg-black/70
+    transition-all duration-300
+    hover:scale-110 hover:shadow-[0_0_12px_rgba(168,85,247,0.4)]
+  "
+        title="GitHub Source"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="w-6 h-6 text-white"
+          className="w-6 h-6 text-white/90 hover:text-white-400 transition-colors duration-300"
           fill="currentColor"
           viewBox="0 0 24 24"
         >
@@ -38,7 +44,10 @@ const LandingPage = () => {
       {/* Content */}
       <div className="relative z-10 text-center px-6 space-y-6">
         <h1
-          className="text-6xl font-black italic text-white drop-shadow-lg"
+          className="
+    text-6xl font-black italic text-white drop-shadow-lg
+    [text-shadow:0_0_10px_rgba(255,255,255,0.6),0_0_20px_rgba(147,197,253,0.5),0_0_40px_rgba(139,92,246,0.3)]
+  "
           style={{ fontFamily: "'Mulish', sans-serif" }}
         >
           Taskly
