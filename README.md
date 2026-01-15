@@ -1,6 +1,6 @@
 # Taskly
 
-### https://taskly-chi-one.vercel.app
+### https://tasklycloud.vercel.app
 
 A **React + Supabase** project manager app to organize your projects and tasks.  
 Supports user authentication, project/task management, and user-specific data.
