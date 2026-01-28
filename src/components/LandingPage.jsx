@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import cat from "/public/bg.gif";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -7,14 +8,14 @@ const LandingPage = () => {
   return (
     <div className="w-screen h-screen relative flex flex-col justify-center items-center">
       {/* Background GIF */}
-      <div className="absolute w-full h-full overflow-hidden">
+      <div className="absolute w-full h-full overflow-hidden top-0 left-0">
         <img
           src="https://i.pinimg.com/originals/fe/e9/55/fee955a4c443424dd55cf8239698291f.gif"
           alt="background"
-          className="w-full h-full object-cover filter contrast-125 saturate-120 brightness-90"
+          className="w-full h-full object-cover filter contrast-125 saturate-120 brightness-90 pointer-events-none select-none"
         />
         {/* Overlay */}
-        <div className="absolute w-full h-full bg-black/40"></div>
+        <div className="absolute w-full h-full bg-black/40 pointer-events-none"></div>
       </div>
 
       {/* GitHub link at top-right */}

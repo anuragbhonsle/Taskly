@@ -1,5 +1,4 @@
 // App.jsx
-// App.jsx
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,7 @@ import NoProject from "./components/NoProjects";
 import ProjectsSidebar from "./components/ProjectsSidebar";
 import SelectedProject from "./components/SelectedProject";
 import UserMenu from "./components/UserMenu";
+import cat from "/public/bg.gif";
 
 function App() {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ function App() {
     }
   };
 
-  // --- Project Handlers ---
+  // Project Handlers
   const handleStartAddProject = () =>
     setProjectState((prev) => ({ ...prev, selectedProjectId: null }));
 
@@ -100,12 +100,12 @@ function App() {
     }));
   };
 
-  // --- Task Handlers ---
+  // Task Handlers
   const handleAddTask = async (text) => {
     const projectId = projectState.selectedProjectId;
     if (!projectId) return;
 
-    // ✅ Fetch current user ID
+    //  Fetch current user ID
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData.user.id;
 
@@ -135,13 +135,13 @@ function App() {
     }));
   };
 
-  // --- Derived Data ---
+  // Derived Data
   const selectedProject = projectState.projects.find(
-    (p) => p.id === projectState.selectedProjectId
+    (p) => p.id === projectState.selectedProjectId,
   );
 
   const projectTasks = projectState.tasks.filter(
-    (t) => t.project_id === projectState.selectedProjectId
+    (t) => t.project_id === projectState.selectedProjectId,
   );
 
   const isNoProject = projectState.selectedProjectId === undefined;
@@ -170,7 +170,7 @@ function App() {
       {/* Background GIF with filter */}
       <div className="absolute w-full h-full overflow-hidden">
         <img
-          src="https://i.pinimg.com/originals/fe/e9/55/fee955a4c443424dd55cf8239698291f.gif"
+          src={cat}
           className="w-full h-full object-cover filter contrast-125 saturate-120 brightness-90"
         />
         <div className="absolute w-full h-full bg-black/40"></div>
